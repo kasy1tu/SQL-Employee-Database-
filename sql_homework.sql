@@ -1,7 +1,7 @@
 DROP TABLE IF EXISTS employees;
 DROP TABLE IF EXISTS departments;
 DROP TABLE IF EXISTS dept_manager;
-DROP TABLE IF EXISTS title;
+DROP TABLE IF EXISTS titles;
 DROP TABLE IF EXISTS dept_emp;
 DROP TABLE IF EXISTS salaries;
 
@@ -20,12 +20,12 @@ CREATE TABLE titles(
 CREATE TABLE employees(
 	emp_no INT PRIMARY KEY,
 	emp_title_id VARCHAR(30), 
-	birth_date VARCHAR(30),
+	birth_date DATE,
 	first_name VARCHAR(30),
 	last_name VARCHAR(30),
 	sex VARCHAR(30),
-	hire_date VARCHAR(30),
-	FOREIGN KEY (emp_title_id) REFERENCES title(title_id)
+	hire_date DATE,
+	FOREIGN KEY (emp_title_id) REFERENCES titles(title_id)
 );
 
 CREATE TABLE dept_emp(
@@ -53,7 +53,7 @@ CREATE TABLE dept_manager(
 COPY departments from '/Users/kasytu/Public/departments.csv'
 DELIMITER ',' CSV HEADER;
 
-COPY title from '/Users/kasytu/Public/titles.csv'
+COPY titles from '/Users/kasytu/Public/titles.csv'
 DELIMITER ',' CSV HEADER;
 
 COPY employees from '/Users/kasytu/Public/employees.csv'
@@ -77,20 +77,52 @@ e.emp_no=s.emp_no;
 -- Question 2 ?
 SELECT first_name, last_name, hire_date
 FROM employees
-WHERE hire_date >= '1/1/1986' AND hire_date <= '12/31/1986';
+WHERE hire_date BETWEEN '1986-01-01' AND '1986-12-31';
 
 -- Question 3
 SELECT m.dept_no, d.dept_name, m.emp_no, e.last_name, e.first_name
 FROM dept_manager as m
-	JOIN departments as d
+	LEFT JOIN departments as d
 	ON (d.dept_no = m.dept_no)
-		JOIN employees as e
+		LEFT JOIN employees as e
 		ON (m.emp_no = e.emp_no);
 
 -- Question 4
 SELECT de.emp_no, e.last_name, e.first_name, d.dept_name
 FROM departments as d
-	JOIN dept_emp as de
+	LEFT JOIN dept_emp as de
 	ON (de.dept_no = d.dept_no)
-		JOIN employees as e
-		ON (e.emp_no = de.emp_no)
+		LEFT JOIN employees as e
+		ON (e.emp_no = de.emp_no);
+
+-- Question 5 
+SELECT first_name, last_name, sex
+FROM employees
+WHERE first_name = 'Hercules' and last_name LIKE 'B%'
+
+-- Question 6 
+SELECT e.emp_no, e.last_name, e.first_name, d.dept_name
+FROM employees as e
+	JOIN dept_emp as de
+	ON (e.emp_no = de.emp_no)
+		JOIN departments as d 
+		ON (d.dept_no = de.dept_no)
+		WHERE dept_name = 'Sales';
+
+-- Question 7 
+SELECT e.emp_no, e.last_name, e.first_name, d.dept_name
+FROM employees as e
+	JOIN dept_emp as de
+	ON (e.emp_no = de.emp_no)
+		JOIN departments as d 
+		ON (d.dept_no = de.dept_no)
+		WHERE dept_name = 'Sales' OR dept_name = 'Development'
+		
+-- Question 8 
+SELECT COUNT(last_name) as "Last Name", last_name
+FROM employees
+GROUP BY last_name
+ORDER BY "Last Name" DESC;
+
+
+
